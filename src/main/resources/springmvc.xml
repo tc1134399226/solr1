@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+        
+	<!-- 
+		仅扫描controller
+	 -->
+	<context:component-scan base-package="com.qfjy" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	
+	<!-- 处理静态资源 
+		 将在 SpringMVC 上下文中定义一个 DefaultServletHttpRequestHandler，
+		 它会对进入 DispatcherServlet 的 请求进行筛查，
+		 如果发现是没有经过映射的请求，就将该请求交由 WEB 应用服务器默认的 Servlet 处理，
+		 如果不是静态资源的请求，才由 DispatcherServlet 继续处理
+	
+	-->
+	<mvc:default-servlet-handler/>
+	<!-- 
+	是告知Spring，启用注解驱动。然后Spring会自动为我们注册上面说到多个Bean到工厂中，来处理我们的请求。
+	   第一个是HandlerMapping的实现类，它会处理@RequestMapping 注解，并将其注册到请求映射表中。
+​    第二个是HandlerAdapter的实现类，它是处理请求的适配器，就是确定调用哪个类的哪个方法，并且构造方法参数，返回值。
+ 	支持使用 **@RequestBody 和 @ResponseBody 注解**
+	 -->
+	<mvc:annotation-driven/>
+	
+
+
+	
+	
+</beans>

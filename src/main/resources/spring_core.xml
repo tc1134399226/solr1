@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+        
+	
+	
+	
+	
+	
+	<!--1  Spring IOC 指定扫描的包   @Service..@Repository @Component...-->
+	<context:component-scan base-package="com.qfjy" >
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<!--2 Spring AOP启动配置   自动激活动态代理  @Aspect @Before @PointCut... 
+	<aop:aspectj-autoproxy   ></aop:aspectj-autoproxy> -->
+	
+
+	<!-- 
+		 加载外部配置文件 property 
+		标签中有一个属性location，用于指定属性文件的位置
+	-->
+   	<context:property-placeholder  location="classpath:jdbc.properties"/>
+   	
+	<!--3 配置数据源  druid -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		  init-method="init" destroy-method="close">
+		<property name="driverClassName" value="${jdbc_driver}" />
+		<property name="url" value="${jdbc_url}" />
+		<property name="username" value="${jdbc_user}" />
+		<property name="password" value="${jdbc_password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="1" />
+		<property name="minIdle" value="1" />
+		<property name="maxActive" value="10" />
+
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="10000" />
+
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+
+		<property name="testWhileIdle" value="true" />
+
+		<!-- 这里建议配置为TRUE，防止取到的连接不可用 -->
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="false" />
+
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+		<!-- 这里配置提交方式，默认就是TRUE，可以不用配置 -->
+		<property name="defaultAutoCommit" value="true" />
+		<!-- 验证连接有效与否的SQL，不同的数据配置不同 -->
+		<property name="validationQuery" value="select 1 " />
+		
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+		
+	</bean>
+
+	<!--4 Spring JdbcTemplate  -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	
+	<!--  mybatis 和Spring整合 -->
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!--  数据源管理配置 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 指定 别外的包   会使用 Bean 的非限定类名来作为它的别名 -->
+		<property name="typeAliasesPackage" value="com.qfjy.bean"></property>
+		<!-- 指定 映射位置   扫描XML配置文件 -->
+<!--		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>-->
+		
+		<!-- 引入 外部的 mybatis.xml配置 
+		<property name="configLocation" value="classpath:mybatis.xml"></property>
+		-->
+		
+		<!--配置分页插件-->
+    	<property name="plugins">
+	    <array>
+	      <bean class="com.github.pagehelper.PageInterceptor">
+	        <property name="properties">
+	          <!--使用下面的方式配置参数，一行配置一个 -->
+	          <value>
+	            helperDialect=mysql
+	          </value>
+	        </property>
+	      </bean>
+	    </array>
+	  </property>
+		
+		
+	</bean>
+	
+	<!-- 得到SqlSession -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+	
+	<!-- MapperScannerConfigurer 自动扫描 将Mapper接口生成代理注入到Spring DAO接口所在包名，Spring会自动查找其下的类 
+		
+	-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.qfjy.dao"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>	
+	
+	
+	
+	
+	<!--配置 Spring事务 的管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	
+
+	<!-- 启动 注解声明式事务管理 --> 
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+
+</beans>
