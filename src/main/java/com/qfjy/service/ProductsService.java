@@ -9,11 +9,11 @@ public interface ProductsService {
 
     /**
      * 电商主页 京东
-     * @param keyword
-     * @param catalogName
-     * @param priceStr
-     * @param psort
-     * @param currtPage
+     * @param keyword   关键字
+     * @param catalogName   商品名
+     * @param priceStr  价格
+     * @param psort 排序方式
+     * @param currtPage 当前页
      * @param pageSize 每页大小
      * @return
      */
