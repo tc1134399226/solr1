@@ -15,6 +15,15 @@ public class ProductsController {
     @Autowired
     private ProductsService productsService;
 
+    /**
+     * 电商主页 京东
+     * @param keyword   关键字
+     * @param catalogName   商品名
+     * @param priceStr  价格
+     * @param psort 排序方式
+     * @param currtPage 当前页
+     * @return
+     */
     @RequestMapping("search")
     public ModelAndView search(@RequestParam(value = "keyword",required = false) String keyword,
                                @RequestParam(value = "catalogName",required = false)String catalogName,
